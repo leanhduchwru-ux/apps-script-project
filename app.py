@@ -182,7 +182,7 @@ with st.form("doc_input_form", clear_on_submit=True):
     issuer = st.text_input("Cơ quan ban hành 🏢", placeholder="Tên cơ quan, doanh nghiệp phát hành văn bản")
     receiver = st.text_input("Nơi nhận / Người xử lý 👥", placeholder="Ví dụ: Ban Giám đốc, Phòng HC-NS...")
     
-    summary = st.text_area("Trích yếu nội dung 📝", placeholder="Tóm tắt ngắn gọn nội dung cốt lõi của công văn", rows=3)
+    summary = st.text_area("Trích yếu nội dung 📝", placeholder="Tóm tắt ngắn gọn nội dung cốt lõi của công văn", height=100)
     
     # File attachment
     uploaded_file = st.file_uploader(
