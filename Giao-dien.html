@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hệ Thống Nhập Công Văn</title>
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons (CDN) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --error: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem 1rem;
+      overflow-x: hidden;
+    }
+
+    /* Container holding the glass card */
+    .container {
+      width: 100%;
+      max-width: 760px;
+      position: relative;
+    }
+
+    /* Background glow decor */
+    .glow-sphere {
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(79, 70, 229, 0.4) 0%, rgba(79, 70, 229, 0) 70%);
+      filter: blur(40px);
+      z-index: -1;
+    }
+    .glow-1 { top: -80px; left: -80px; }
+    .glow-2 { bottom: -80px; right: -80px; }
+
+    /* Glassmorphism Card */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 3rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Header Styling */
+    .header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .header-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      color: #fff;
+      margin-bottom: 1rem;
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #fff, #c7d2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      font-weight: 300;
+    }
+
+    /* Form Grid Layout */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .full-width {
+      grid-column: span 2;
+    }
+
+    label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Inputs, Select & Textarea */
+    input, select, textarea {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 0.8rem 1rem;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+      background: rgba(15, 23, 42, 0.8);
+    }
+
+    /* Custom File Input Decorator */
+    .file-upload-wrapper {
+      position: relative;
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: rgba(15, 23, 42, 0.3);
+    }
+
+    .file-upload-wrapper:hover {
+      border-color: var(--primary);
+      background: rgba(79, 70, 229, 0.05);
+    }
+
+    .file-upload-wrapper input[type="file"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .upload-icon {
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .file-upload-text {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .file-name-preview {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--success);
+      font-weight: 500;
+    }
+
+    /* Action Buttons */
+    .actions {
+      margin-top: 2rem;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    /* Notifications & Modals */
+    .alert-box {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border-radius: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      display: none;
+      animation: slideIn 0.3s ease forwards;
+    }
+
+    .alert-success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #a7f3d0;
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fecaca;
+    }
+
+    .alert-link {
+      color: #60a5fa;
+      text-decoration: underline;
+      cursor: pointer;
+      margin-left: 0.5rem;
+      display: block;
+      margin-top: 0.4rem;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .full-width {
+        grid-column: span 1;
+      }
+      .card {
+        padding: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="glow-sphere glow-1"></div>
+    <div class="glow-sphere glow-2"></div>
+
+    <div class="card">
+      <div class="header">
+        <div class="header-logo">
+          <i data-lucide="file-text" style="width: 32px; height: 32px;"></i>
+        </div>
+        <h1>Hệ Thống Nhập Công Văn</h1>
+        <p>Ghi nhận, quản lý và lưu trữ tài liệu hành chính</p>
+      </div>
+
+      <form id="docForm">
+        <div class="form-grid">
+          
+          <!-- Loại văn bản -->
+          <div class="form-group">
+            <label for="docType">
+              <i data-lucide="tag" style="width: 16px; height: 16px;"></i>
+              Loại văn bản
+            </label>
+            <select id="docType" name="docType" required>
+              <option value="Công văn">Công văn</option>
+              <option value="Quyết định">Quyết định</option>
+              <option value="Tờ trình">Tờ trình</option>
+              <option value="Báo cáo">Báo cáo</option>
+              <option value="Thông báo">Thông báo</option>
+              <option value="Hợp đồng">Hợp đồng</option>
+              <option value="Khác">Khác...</option>
+            </select>
+          </div>
+
+          <!-- Lưu vào trang tính -->
+          <div class="form-group">
+            <label for="targetSheet">
+              <i data-lucide="database" style="width: 16px; height: 16px;"></i>
+              Lưu vào trang tính
+            </label>
+            <select id="targetSheet" name="targetSheet" required>
+              <option value="Danh sách Công văn">Danh sách Công văn (Chung)</option>
+              <option value="Công văn của công ty">Công văn của công ty</option>
+            </select>
+          </div>
+
+          <!-- Công văn liên kết -->
+          <div class="form-group" id="linkedDocWrapper">
+            <label for="linkedDoc">
+              <i data-lucide="link" style="width: 16px; height: 16px;"></i>
+              Công văn Công ty liên kết
+            </label>
+            <select id="linkedDoc" name="linkedDoc">
+              <option value="">-- Không liên kết --</option>
+            </select>
+          </div>
+
+          <!-- Số / Ký hiệu -->
+          <div class="form-group">
+            <label for="docNumber">
+              <i data-lucide="hash" style="width: 16px; height: 16px;"></i>
+              Số / Ký hiệu
+            </label>
+            <input type="text" id="docNumber" name="docNumber" placeholder="Ví dụ: 12/CV-UBND" required>
+          </div>
+
+          <!-- Ngày ban hành -->
+          <div class="form-group">
+            <label for="publishDate">
+              <i data-lucide="calendar" style="width: 16px; height: 16px;"></i>
+              Ngày ban hành
+            </label>
+            <input type="date" id="publishDate" name="publishDate" required>
+          </div>
+
+          <!-- Ngày nhận -->
+          <div class="form-group">
+            <label for="receiveDate">
+              <i data-lucide="calendar-check" style="width: 16px; height: 16px;"></i>
+              Ngày nhận / Ngày gửi
+            </label>
+            <input type="date" id="receiveDate" name="receiveDate" required>
+          </div>
+
+          <!-- Cơ quan ban hành -->
+          <div class="form-group full-width">
+            <label for="issuer">
+              <i data-lucide="building" style="width: 16px; height: 16px;"></i>
+              Cơ quan ban hành
+            </label>
+            <input type="text" id="issuer" name="issuer" placeholder="Tên cơ quan, doanh nghiệp phát hành văn bản" required>
+          </div>
+
+          <!-- Nơi nhận / Người xử lý -->
+          <div class="form-group full-width">
+            <label for="receiver">
+              <i data-lucide="users" style="width: 16px; height: 16px;"></i>
+              Nơi nhận / Người xử lý
+            </label>
+            <input type="text" id="receiver" name="receiver" placeholder="Ví dụ: Ban Giám đốc, Phòng HC-NS..." required>
+          </div>
+
+          <!-- Trích yếu nội dung -->
+          <div class="form-group full-width">
+            <label for="summary">
+              <i data-lucide="align-left" style="width: 16px; height: 16px;"></i>
+              Trích yếu nội dung
+            </label>
+            <textarea id="summary" name="summary" rows="3" placeholder="Tóm tắt ngắn gọn nội dung cốt lõi của công văn" required></textarea>
+          </div>
+
+          <!-- Tải tệp đính kèm -->
+          <div class="form-group full-width">
+            <label>
+              <i data-lucide="paperclip" style="width: 16px; height: 16px;"></i>
+              Tệp đính kèm (PDF, Docx, Image)
+            </label>
+            <div class="file-upload-wrapper" id="uploadZone">
+              <i data-lucide="upload-cloud" class="upload-icon" style="width: 36px; height: 36px;"></i>
+              <p class="file-upload-text">Nhấp vào đây hoặc kéo thả tệp tin để tải lên</p>
+              <input type="file" id="fileAttachment" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg">
+              <div class="file-name-preview" id="fileNamePreview"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Submit actions -->
+        <div class="actions">
+          <button type="submit" class="btn btn-primary" id="btnSubmit">
+            <span class="spinner" id="spinner"></span>
+            <span id="btnText">Lưu Công Văn</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Alert Message -->
+      <div class="alert-box" id="alertBox">
+        <i data-lucide="check-circle" id="alertIcon" style="width: 20px; height: 20px; flex-shrink: 0;"></i>
+        <div>
+          <span id="alertMessage"></span>
+          <a id="sheetLink" class="alert-link" target="_blank" href="#">Nhấn vào đây để xem Google Sheets</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Auto-fill today's date for Ngày nhận
+    document.getElementById('receiveDate').valueAsDate = new Date();
+    document.getElementById('publishDate').valueAsDate = new Date();
+
+    const fileInput = document.getElementById('fileAttachment');
+    const fileNamePreview = document.getElementById('fileNamePreview');
+    const uploadZone = document.getElementById('uploadZone');
+
+    // Display file name preview on select
+    fileInput.addEventListener('change', (e) => {
+      if (fileInput.files.length > 0) {
+        fileNamePreview.textContent = `📁 Đã chọn: ${fileInput.files[0].name}`;
+      } else {
+        fileNamePreview.textContent = '';
+      }
+    });
+
+    // Form submission processing
+    const form = document.getElementById('docForm');
+    const btnSubmit = document.getElementById('btnSubmit');
+    const btnText = document.getElementById('btnText');
+    const spinner = document.getElementById('spinner');
+    const alertBox = document.getElementById('alertBox');
+    const alertMessage = document.getElementById('alertMessage');
+    const alertIcon = document.getElementById('alertIcon');
+    const sheetLink = document.getElementById('sheetLink');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      // UI state loading
+      btnSubmit.disabled = true;
+      spinner.style.display = 'block';
+      btnText.textContent = 'Đang xử lý...';
+      alertBox.style.display = 'none';
+
+      const file = fileInput.files[0];
+      const formData = {
+        docType: document.getElementById('docType').value,
+        targetSheet: document.getElementById('targetSheet').value,
+        linkedDoc: document.getElementById('linkedDoc').value,
+        docNumber: document.getElementById('docNumber').value,
+        publishDate: document.getElementById('publishDate').value,
+        receiveDate: document.getElementById('receiveDate').value,
+        issuer: document.getElementById('issuer').value,
+        receiver: document.getElementById('receiver').value,
+        summary: document.getElementById('summary').value,
+        fileData: null,
+        fileName: null,
+        fileType: null
+      };
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          formData.fileData = e.target.result;
+          formData.fileName = file.name;
+          formData.fileType = file.type;
+          sendDataToAppsScript(formData);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        sendDataToAppsScript(formData);
+      }
+    });
+
+    function sendDataToAppsScript(data) {
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .withFailureHandler(onFailure)
+        .submitDocument(data);
+    }
+
+    function onSuccess(response) {
+      // Reset loading state
+      btnSubmit.disabled = false;
+      spinner.style.display = 'none';
+      btnText.textContent = 'Lưu Công Văn';
+
+      alertBox.style.display = 'flex';
+      if (response.success) {
+        alertBox.className = 'alert-box alert-success';
+        alertIcon.setAttribute('data-lucide', 'check-circle');
+        alertMessage.textContent = response.message;
+        sheetLink.style.display = 'block';
+        sheetLink.href = response.sheetUrl;
+        
+        // Reset form
+        form.reset();
+        fileNamePreview.textContent = '';
+        document.getElementById('receiveDate').valueAsDate = new Date();
+        document.getElementById('publishDate').valueAsDate = new Date();
+        loadLinkedDocs(); // Cập nhật dropdown công văn liên kết mới nhất
+      } else {
+        alertBox.className = 'alert-box alert-error';
+        alertIcon.setAttribute('data-lucide', 'alert-triangle');
+        alertMessage.textContent = response.message;
+        sheetLink.style.display = 'none';
+      }
+      lucide.createIcons();
+    }
+
+    function onFailure(error) {
+      btnSubmit.disabled = false;
+      spinner.style.display = 'none';
+      btnText.textContent = 'Lưu Công Văn';
+
+      alertBox.style.display = 'flex';
+      alertBox.className = 'alert-box alert-error';
+      alertIcon.setAttribute('data-lucide', 'alert-triangle');
+      alertMessage.textContent = "Lỗi kết nối Server: " + error.toString();
+      sheetLink.style.display = 'none';
+      lucide.createIcons();
+    }
+
+    // Tải và hiển thị danh sách công văn công ty để liên kết
+    function populateLinkedDocs(docs) {
+      const select = document.getElementById('linkedDoc');
+      select.innerHTML = '<option value="">-- Không liên kết --</option>';
+      if (docs && docs.length > 0) {
+        docs.forEach(doc => {
+          const option = document.createElement('option');
+          option.value = doc.docNumber;
+          option.textContent = `${doc.docNumber} - ${doc.summary.substring(0, 35)}${doc.summary.length > 35 ? '...' : ''}`;
+          select.appendChild(option);
+        });
+      }
+    }
+
+    // Tự động load danh sách công văn liên kết khi khởi động
+    function loadLinkedDocs() {
+      google.script.run
+        .withSuccessHandler(populateLinkedDocs)
+        .getCompanyDocuments();
+    }
+
+    loadLinkedDocs();
+
+    // Ẩn hiện phần liên kết động dựa trên trang tính đích được chọn
+    document.getElementById('targetSheet').addEventListener('change', function() {
+      const isCompanySheet = this.value === 'Công văn của công ty';
+      document.getElementById('linkedDocWrapper').style.display = isCompanySheet ? 'none' : 'flex';
+    });
+  </script>
+</body>
+</html>
