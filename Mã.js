@@ -4,9 +4,15 @@ const COMPANY_SHEET_NAME = "Công văn của công ty";
 const FOLDER_NAME = "Công văn Đính kèm";
 
 /**
- * Điều hướng người dùng đến giao diện Web App
+ * Điều hướng người dùng đến giao diện Web App hoặc trả về API JSON
  */
-function doGet() {
+function doGet(e) {
+  if (e && e.parameter && e.parameter.action === "getCompanyDocs") {
+    const docs = getCompanyDocuments();
+    return ContentService.createTextOutput(JSON.stringify(docs))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
   return HtmlService.createTemplateFromFile("Giao-dien")
     .evaluate()
     .setTitle("Hệ thống Nhập Công văn")
@@ -213,3 +219,21 @@ function submitDocument(data) {
     };
   }
 }
+
+/**
+ * API Endpoint nhận dữ liệu gửi lên từ Python Streamlit
+ */
+function doPost(e) {
+  try {
+    const postData = JSON.parse(e.postData.contents);
+    const result = submitDocument(postData);
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      message: "Lỗi xử lý API doPost: " + error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
